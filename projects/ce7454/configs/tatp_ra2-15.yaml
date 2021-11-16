@@ -1,0 +1,72 @@
+includes:
+  - configs/datasets/hateful_memes/bert.yaml
+
+env:
+  save_dir: ./runs/tatp_ra2-15
+
+dataset_config:
+  hateful_memes:
+    annotations:
+      train:
+        - hateful_memes/defaults/annotations/train_tatp.jsonl
+    processors:
+      image_processor:
+        type: torchvision_transforms
+        params:
+          transforms:
+            - type: RandomAugment
+              params:
+                num_transforms: 2
+                magnitude: 15
+            - type: Resize
+              params:
+                size: [256, 256]
+            - type: CenterCrop
+              params:
+                size: [224, 224]
+            - ToTensor
+            - GrayScaleTo3Channels
+            - type: Normalize
+              params:
+                mean: [0.46777044, 0.44531429, 0.40661017]
+                std: [0.12221994, 0.12145835, 0.14380469]
+
+model_config:
+  concat_bert:
+    classifier:
+      type: mlp
+      params:
+        num_layers: 2
+    losses:
+      - type: cross_entropy
+
+scheduler:
+  type: warmup_linear
+  params:
+    num_warmup_steps: 2000
+    num_training_steps: ${training.max_updates}
+
+optimizer:
+  type: adam_w
+  params:
+    lr: 1e-5
+    eps: 1e-8
+
+evaluation:
+  metrics:
+    - accuracy
+    - binary_f1
+    - roc_auc
+
+training:
+  seed: 15192421
+  batch_size: 64
+  lr_scheduler: true
+  max_updates: 22000
+  early_stop:
+    criteria: hateful_memes/roc_auc
+    minimize: false
+
+checkpoint:
+  pretrained_state_mapping:
+    base: base
