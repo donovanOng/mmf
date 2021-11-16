@@ -2,7 +2,7 @@ includes:
   - configs/datasets/hateful_memes/bert.yaml
 
 env:
-  save_dir: ./runs/baseline
+  save_dir: ./runs/d08
 
 model_config:
   concat_bert:
