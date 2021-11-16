@@ -2,7 +2,7 @@ includes:
   - configs/datasets/hateful_memes/bert.yaml
 
 env:
-  save_dir: ./runs/tatp-d08
+  save_dir: ./runs/tatp_d08
 
 dataset_config:
   hateful_memes:
