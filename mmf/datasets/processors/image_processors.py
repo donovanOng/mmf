@@ -12,6 +12,7 @@ from mmf.datasets.processors.processors import BaseProcessor
 from omegaconf import OmegaConf
 from torchvision import transforms
 from torchvision.transforms import Compose, Normalize, Resize, ToTensor
+from mmf.datasets.processors.augmentation import RandAugment
 
 
 @registry.register_processor("torchvision_transforms")
@@ -95,6 +96,23 @@ class GrayScaleTo3Channels(BaseProcessor):
         if x.size(0) == 1:
             x = torch.cat([x] * 3, dim=0)
         return x
+
+
+@registry.register_processor("RandomAugment")
+class RandomAugment(BaseProcessor):
+    def __init__(self, *args, **kwargs):
+        self.randaugment = RandAugment(kwargs["num_transforms"], kwargs["magnitude"])
+
+    def __call__(self, x):
+        if isinstance(x, collections.abc.Mapping):
+            x = x["image"]
+            return {"image": self.transform(x)}
+        else:
+            return self.transform(x)
+
+    def transform(self, image):
+        image = self.randaugment(image)
+        return image
 
 
 @registry.register_processor("ResizeShortest")
